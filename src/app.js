@@ -5,6 +5,7 @@ const addAccountRequestRoutes = require('./APIs/AddAccountRequest/routes/addAcco
 const getAccountDetailRequest = require('./APIs/GetAccountDetailRequest/routes/getAccountDetailRequest.route')
 const removeAccountRequest = require('./APIs/RemoveAccountRequest/routes/route')
 const VASAccountRequestRoutes = require('./APIs/VASAccountRequest/routes/route')
+const getProfile = require('./APIs/GetProfile/routes/route')
 
 const app = express();
 
@@ -17,6 +18,7 @@ app.use('/', addAccountRequestRoutes);
 app.use('/',getAccountDetailRequest);
 app.use('/',removeAccountRequest);
 app.use('/', VASAccountRequestRoutes)
+app.use('/',getProfile)
 // Global error handler (must handle TMF error format for CTK)
 //app.use(require('./common/middleware/errorHandler'));
 
