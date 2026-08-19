@@ -17,5 +17,10 @@
   "bugs": {
     "url": "https://github.com/OmniChannelServiceHub-SLT/Omni-customer-account-service/issues"
   },
-  "homepage": "https://github.com/OmniChannelServiceHub-SLT/Omni-customer-account-service#readme"
+  "homepage": "https://github.com/OmniChannelServiceHub-SLT/Omni-customer-account-service#readme",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mongoose": "^9.9.3"
+  }
 }
