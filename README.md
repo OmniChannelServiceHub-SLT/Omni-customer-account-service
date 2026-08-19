@@ -40,7 +40,7 @@ type instead.
 ```bash
 cp .env.example .env
 npm install
-npm run dev
+node server.js
 ```
 
 Service listens on `PORT` from `.env` (default 3002). You can hit it directly
