@@ -20,7 +20,8 @@ const removeAccountRequest = require(
   './APIs/RemoveAccountRequest/routes/route'
 );
 const VASAccountRequestRoutes = require('./APIs/VASAccountRequest/routes/route')
-
+const getProfile = require('./APIs/GetProfile/routes/route')
+const updateContact = require('./APIs/UpdateContact/routes/route')
 
 const app = express();
 
@@ -40,5 +41,7 @@ app.use('/', addAccountRequestRoutes);
 app.use('/', getAccountDetailRequest);
 app.use('/', removeAccountRequest);
 app.use('/', VASAccountRequestRoutes)
+app.use('/',getProfile)
+app.use('/',updateContact)
 
 module.exports = app;
