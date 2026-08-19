@@ -49,11 +49,11 @@ const accountSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Pre-save hook to generate href
-accountSchema.pre('save', function (next) {
+accountSchema.pre('save', function () {
   if (!this.href) {
     this.href = `/tmf-api/accountManagement/v4/account/${this.id}`;
   }
-  next();
+ // next();
 });
 
 module.exports = mongoose.model('TMF666_Account', accountSchema);
