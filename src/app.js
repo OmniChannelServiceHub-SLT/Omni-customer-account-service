@@ -23,7 +23,7 @@ const VASAccountRequestRoutes = require('./APIs/VASAccountRequest/routes/route')
 const getProfile = require('./APIs/GetProfile/routes/route')
 const updateContact = require('./APIs/UpdateContact/routes/route')
 const updateISPContact = require('./APIs/UpdateISPContact/routes/route')
-
+const listExistCustomer = require('./APIs/ListExistCustomer/routes/route')
 const app = express();
 
 app.use(express.json());
@@ -45,6 +45,6 @@ app.use('/', VASAccountRequestRoutes)
 app.use('/',getProfile)
 app.use('/',updateContact)
 app.use('/',updateISPContact)
-
+app.use('/', listExistCustomer)
 
 module.exports = app;
