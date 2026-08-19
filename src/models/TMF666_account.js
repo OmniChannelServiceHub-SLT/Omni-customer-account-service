@@ -44,6 +44,7 @@ const accountSchema = new mongoose.Schema({
     },
     preferred: { type: Boolean, default: false },
   }],
+  userKey: String,
   '@baseType': { type: String, default: 'Account' },
   '@schemaLocation': { type: String },
 }, { timestamps: true });
