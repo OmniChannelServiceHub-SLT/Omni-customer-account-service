@@ -1,7 +1,7 @@
 const service = require('../services/service');
 
 exports.deleteAccount = async (req, res) => {
-  const { id } = req.params; // accountNo
+  const { id } = req.params; // accountNo from URL
 
   // Check if account exists
   const account = await service.getAccountById(id);
@@ -15,6 +15,17 @@ exports.deleteAccount = async (req, res) => {
   // Delete the account
   await service.removeAccountById(id);
 
-  // TMF standard: 204 No Content on successful delete
-  res.status(204).send();
+  // Return success with the deleted account resource
+  res.json({
+    id: account.id,
+    href: account.href,
+    '@type': account['@type'],
+    name: account.name,
+    description: account.description,
+    state: 'terminated', // or 'deleted'
+    relatedParty: account.relatedParty,
+    contact: account.contact,
+    '@baseType': account['@baseType'],
+    '@schemaLocation': account['@schemaLocation'],
+  });
 };

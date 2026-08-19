@@ -3,7 +3,7 @@ const controller = require('../controllers/controller');
 
 const router = express.Router();
 
-// TMF666-compliant DELETE account
-router.delete('/tmf-api/accountManagement/v4/account/:id', controller.deleteAccount);
+// TMF666-compliant account removal (POST kept, but TMF path)
+router.post('/tmf-api/accountManagement/v4/account/:id/terminate', controller.deleteAccount);
 
 module.exports = router;
