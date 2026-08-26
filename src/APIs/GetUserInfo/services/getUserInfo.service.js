@@ -18,4 +18,9 @@ exports.getIndividualById = async (id) => {
 exports.createIndividual = async (individualData) => {
   const individual = new Individual(individualData);
   return await individual.save();
+
+// NEW: Find multiple individuals with filters
+exports.findIndividuals = async (filter) => {
+  return await Individual.find(filter);
+};
 };

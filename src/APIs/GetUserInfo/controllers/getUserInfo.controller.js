@@ -1,30 +1,109 @@
 const service = require('../services/getUserInfo.service');
 
 /**
- * TMF632-compliant GET /individual/{id}
- * Returns pure TMF resource – NO legacy envelope.
+ * TMF632-compliant GET /individual
+ * Supports:
+ *   - GET /individual/{id} (by ID)
+ *   - GET /individual?familyName=xxx (filter by familyName)
+ *   - GET /individual?givenName=xxx (filter by givenName)
+ *   - GET /individual?id=xxx (filter by id)
+ *   - GET /individual?fields=familyName,givenName (field selection)
  */
 exports.getIndividual = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const individual = await service.getIndividualById(id);
+    // Case 1: GET /individual/:id (path param)
+    if (req.params.id) {
+      const { id } = req.params;
+      const individual = await service.getIndividualById(id);
 
-    // Build TMF632 resource shape
-    const resource = {
-      id: individual.id,
-      href: individual.href || `/tmf-api/partyManagement/v4/individual/${individual.id}`,
-      '@type': individual['@type'] || 'Individual',
-      name: individual.name,
-      givenName: individual.givenName,
-      familyName: individual.familyName,
-      contactMedium: individual.contactMedium,
-      status: individual.status,
-      '@baseType': individual['@baseType'] || 'Individual',
-      '@schemaLocation': individual['@schemaLocation'],
-    };
+      if (!individual) {
+        return res.status(404).json({
+          code: 'NOT_FOUND',
+          message: `Individual with id ${id} not found`
+        });
+      }
 
-    // ✅ CTK expects 200 with pure JSON resource
-    res.status(200).json(resource);
+      // Return single TMF632 resource
+      return res.status(200).json({
+        id: individual.id,
+        href: individual.href || `/tmf-api/partyManagement/v4/individual/${individual.id}`,
+        '@type': individual['@type'] || 'Individual',
+        name: individual.name,
+        givenName: individual.givenName,
+        familyName: individual.familyName,
+        contactMedium: individual.contactMedium,
+        status: individual.status,
+        '@baseType': individual['@baseType'] || 'Individual',
+        '@schemaLocation': individual['@schemaLocation'],
+      });
+    }
+
+    // Case 2: GET /individual? (query filters)
+    const { id, familyName, givenName, fields, subscriberID } = req.query;
+
+    // Build filter object
+    let filter = {};
+    
+    // TMF standard filters
+    if (id) filter.id = id;
+    if (familyName) filter.familyName = familyName;
+    if (givenName) filter.givenName = givenName;
+    
+    // Legacy support (subscriberID)
+    if (subscriberID) filter.id = subscriberID;
+
+    // If no filters provided, return 400 (CTK expects this)
+    if (Object.keys(filter).length === 0) {
+      return res.status(400).json({
+        code: 'MISSING_PARAMETER',
+        message: 'At least one filter parameter is required (id, familyName, givenName, subscriberID)'
+      });
+    }
+
+    // Query database
+    const individuals = await service.findIndividuals(filter);
+
+    if (!individuals || individuals.length === 0) {
+      return res.status(404).json({
+        code: 'NOT_FOUND',
+        message: 'No Individuals found matching criteria'
+      });
+    }
+
+    // Handle field selection (CTK uses this)
+    const selectedFields = fields ? fields.split(',') : null;
+
+    // Map to TMF resources
+    const resources = individuals.map(ind => {
+      const resource = {
+        id: ind.id,
+        href: ind.href || `/tmf-api/partyManagement/v4/individual/${ind.id}`,
+        '@type': ind['@type'] || 'Individual',
+        name: ind.name,
+        givenName: ind.givenName,
+        familyName: ind.familyName,
+        contactMedium: ind.contactMedium || [],
+        status: ind.status || 'active',
+        '@baseType': ind['@baseType'] || 'Individual',
+        '@schemaLocation': ind['@schemaLocation']
+      };
+
+      // Apply field selection if requested
+      if (selectedFields) {
+        const filtered = {};
+        selectedFields.forEach(field => {
+          if (field in resource) {
+            filtered[field] = resource[field];
+          }
+        });
+        return filtered;
+      }
+
+      return resource;
+    });
+
+    res.status(200).json(resources);
+
   } catch (err) {
     next(err);
   }
@@ -67,10 +146,10 @@ exports.createIndividual = async (req, res) => {
     '@schemaLocation': newIndividual['@schemaLocation']
   });
 };
+
 /**
  * Legacy wrapper for mobile client:
  * GET /api/Account/ViewUserInfo?userName=XXX
- * Returns the legacy { isSuccess, dataBundle } envelope.
  */
 exports.getViewUserInfoLegacy = async (req, res, next) => {
   try {
@@ -86,15 +165,12 @@ exports.getViewUserInfoLegacy = async (req, res, next) => {
       });
     }
 
-    // Reuse the same service
     const individual = await service.getIndividualById(userName);
 
-    // Map to legacy flat shape (as per ViewUserInfo sample)
     const dataBundle = {
       name: individual.name,
       altrContact: individual.contactMedium?.find(c => c.mediumType === 'Phone')
         ?.characteristic?.phoneNumber || null,
-      // Add other legacy fields if needed
     };
 
     res.json({
@@ -106,7 +182,6 @@ exports.getViewUserInfoLegacy = async (req, res, next) => {
       errorCode: null,
     });
   } catch (err) {
-    // For 404, return legacy failure envelope
     if (err.statusCode === 404) {
       return res.status(404).json({
         isSuccess: false,

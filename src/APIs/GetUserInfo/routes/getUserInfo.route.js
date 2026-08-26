@@ -11,4 +11,8 @@ router.get('/api/Account/ViewUserInfo', controller.getViewUserInfoLegacy);
 
 router.post('/tmf-api/partyManagement/v4/individual', controller.createIndividual);
 
+// TMF632: GET with query filters
+router.get('/tmf-api/partyManagement/v4/individual', controller.getIndividual);
+
+
 module.exports = router;
