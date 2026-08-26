@@ -1,39 +1,53 @@
-require("dotenv").config();
-const mongoose = require("mongoose");
-const app = require("./src/app");
+require('dotenv').config();
+
+const mongoose = require('mongoose');
+const app = require('./src/app');
 
 const MONGO_URI = process.env.MONGODB_URI;
-const PORT = process.env.PORT || 3002;
+const PORT = Number(process.env.PORT || 3002);
 
-mongoose
-  .connect(MONGO_URI)
-  .then(() => {
-    console.log("✅ MongoDB connected");
-    startServer(PORT);
-  })
-  .catch((err) => console.error("❌ DB connection error:", err));
-
-
-//startServer(PORT); // remove this after putting the con string to mongo
-
-
-function startServer(port) {
-  const server = app.listen(port);
-
-  server.on("listening", () => {
-    const address = server.address();
-    if (address && typeof address === "object") {
-      console.log(`Server has started.`);
-      console.log(`visit - http://localhost:${address.port}`);
+async function start() {
+  try {
+    if (!MONGO_URI) {
+      throw new Error(
+        'MONGODB_URI is missing. Create a .env file in the project root and add MONGODB_URI.'
+      );
     }
-  });
 
-  server.on("error", (err) => {
-    if (err.code === "EADDRINUSE") {
-      console.log(`⚠️ Port ${port} is busy. Trying ${port + 1}...`);
-      startServer(port + 1);
-    } else {
-      console.error("❌ Server error:", err);
-    }
-  });
+    await mongoose.connect(MONGO_URI);
+
+    console.log(
+      `✅ MongoDB connected (${mongoose.connection.name})`
+    );
+
+    const server = app.listen(PORT, () => {
+      console.log(
+        `✅ OmniChannel Customer & Account Service listening on port ${PORT}`
+      );
+      console.log(
+        `Health: http://localhost:${PORT}/health`
+      );
+    });
+
+    server.on('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        console.error(
+          `❌ Port ${PORT} is already in use.`
+        );
+        process.exit(1);
+      }
+
+      console.error('❌ Server error:', err);
+      process.exit(1);
+    });
+  } catch (err) {
+    console.error(
+      '❌ Customer & Account Service startup failed:',
+      err.message
+    );
+
+    process.exit(1);
+  }
 }
+
+start();
