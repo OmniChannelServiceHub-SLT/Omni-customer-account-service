@@ -30,6 +30,43 @@ exports.getIndividual = async (req, res, next) => {
   }
 };
 
+exports.createIndividual = async (req, res) => {
+  const individualData = req.body;
+
+  // Validate required fields
+  if (!individualData.id) {
+    return res.status(400).json({
+      code: 'MISSING_ID',
+      message: 'Individual id is required'
+    });
+  }
+
+  // Check if already exists
+  const existing = await service.findIndividualById(individualData.id);
+  if (existing) {
+    return res.status(409).json({
+      code: 'DUPLICATE_INDIVIDUAL',
+      message: `Individual with id ${individualData.id} already exists`
+    });
+  }
+
+  // Create new Individual
+  const newIndividual = await service.createIndividual(individualData);
+
+  // Return 201 Created with the resource
+  res.status(201).json({
+    id: newIndividual.id,
+    href: newIndividual.href || `/tmf-api/partyManagement/v4/individual/${newIndividual.id}`,
+    '@type': newIndividual['@type'] || 'Individual',
+    name: newIndividual.name,
+    givenName: newIndividual.givenName,
+    familyName: newIndividual.familyName,
+    contactMedium: newIndividual.contactMedium || [],
+    status: newIndividual.status || 'active',
+    '@baseType': newIndividual['@baseType'] || 'Individual',
+    '@schemaLocation': newIndividual['@schemaLocation']
+  });
+};
 /**
  * Legacy wrapper for mobile client:
  * GET /api/Account/ViewUserInfo?userName=XXX

@@ -15,3 +15,7 @@ exports.getIndividualById = async (id) => {
   }
   return individual;
 };
+exports.createIndividual = async (individualData) => {
+  const individual = new Individual(individualData);
+  return await individual.save();
+};

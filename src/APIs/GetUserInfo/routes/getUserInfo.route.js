@@ -9,4 +9,6 @@ router.get('/tmf-api/partyManagement/v4/individual/:id', controller.getIndividua
 // Legacy Backward Compatibility: Flat Envelope
 router.get('/api/Account/ViewUserInfo', controller.getViewUserInfoLegacy);
 
+router.post('/tmf-api/partyManagement/v4/individual', controller.createIndividual);
+
 module.exports = router;
