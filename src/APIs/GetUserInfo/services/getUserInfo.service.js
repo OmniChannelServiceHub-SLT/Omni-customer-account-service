@@ -1,8 +1,8 @@
 const Individual = require('../../../models/TMF632_individual');
 
 /**
- * Fetch an Individual by its TMF ID (which maps to legacy userName).
- * Throws 404 if not found.
+ * Fetch an Individual by its TMF ID
+ * Throws 404 if not found
  */
 exports.getIndividualById = async (id) => {
   const individual = await Individual.findOne({ id });
@@ -15,12 +15,26 @@ exports.getIndividualById = async (id) => {
   }
   return individual;
 };
+
+/**
+ * Find an Individual by ID (returns null if not found)
+ * Used for existence checks in createIndividual
+ */
+exports.findIndividualById = async (id) => {
+  return await Individual.findOne({ id });
+};
+
+/**
+ * Create a new Individual
+ */
 exports.createIndividual = async (individualData) => {
   const individual = new Individual(individualData);
   return await individual.save();
+};
 
-// NEW: Find multiple individuals with filters
+/**
+ * Find multiple Individuals with filters
+ */
 exports.findIndividuals = async (filter) => {
   return await Individual.find(filter);
-};
 };
