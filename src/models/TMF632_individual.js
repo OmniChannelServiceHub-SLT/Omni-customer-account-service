@@ -71,11 +71,10 @@ const individualSchema = new mongoose.Schema({
 );
 
 // Pre-save hook to generate href
-individualSchema.pre('save', function (next) {
+individualSchema.pre('save',async function () {
   if (!this.href) {
     this.href = `/tmf-api/partyManagement/v4/individual/${this.id}`;
   }
-  next();
 });
 
 module.exports = mongoose.model('TMF632_individual', individualSchema);

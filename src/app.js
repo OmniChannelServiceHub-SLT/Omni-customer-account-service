@@ -25,6 +25,7 @@ const updateContact = require('./APIs/UpdateContact/routes/route')
 const updateISPContact = require('./APIs/UpdateISPContact/routes/route')
 const listExistCustomer = require('./APIs/ListExistCustomer/routes/route')
 const customerValidation = require('./APIs/GETCustomerValidation/routes/route')
+const createIndividualRoutes = require('./APIs/GetUserInfo/routes/getUserInfo.route');// for ctk632
 const app = express();
 
 app.use(express.json());
@@ -48,5 +49,6 @@ app.use('/',updateContact);
 app.use('/',updateISPContact);
 app.use('/', listExistCustomer);
 app.use('/',customerValidation);
+app.use('/', createIndividualRoutes);//for ctk632
 
 module.exports = app;
