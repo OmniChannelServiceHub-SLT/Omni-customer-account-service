@@ -56,9 +56,7 @@ exports.getIndividual = async (req, res, next) => {
     if (Object.keys(filter).length === 0) {
         const allIndividuals = await service.findIndividuals({});
   
-        // Map to TMF resources (same as before)
-        const resources = allIndividuals.map(ind => ({ ... }));
-        return res.status(200).json(resources);  // ← Return all
+        return res.status(200).json(allIndividuals);
     }
 
     // Query database
