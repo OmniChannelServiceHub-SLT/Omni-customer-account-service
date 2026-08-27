@@ -54,7 +54,11 @@ exports.getIndividual = async (req, res, next) => {
 
     // If no filters provided, return 400 (CTK expects this)
     if (Object.keys(filter).length === 0) {
-      return res.status(200).json([]);
+        const allIndividuals = await service.findIndividuals({});
+  
+        // Map to TMF resources (same as before)
+        const resources = allIndividuals.map(ind => ({ ... }));
+        return res.status(200).json(resources);  // ← Return all
     }
 
     // Query database
