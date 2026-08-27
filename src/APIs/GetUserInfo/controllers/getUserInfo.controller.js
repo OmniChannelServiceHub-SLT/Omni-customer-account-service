@@ -54,10 +54,7 @@ exports.getIndividual = async (req, res, next) => {
 
     // If no filters provided, return 400 (CTK expects this)
     if (Object.keys(filter).length === 0) {
-      return res.status(400).json({
-        code: 'MISSING_PARAMETER',
-        message: 'At least one filter parameter is required (id, familyName, givenName, subscriberID)'
-      });
+      return res.status(200).json([]);
     }
 
     // Query database
