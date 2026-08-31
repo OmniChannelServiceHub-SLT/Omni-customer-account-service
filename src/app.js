@@ -1,5 +1,7 @@
 const express = require('express');
 
+const VASgetProfile = require('./APIS/VAS_ListProfile/routes/route')
+
 const getUserInfoRoutes = require(
   './APIs/GetUserInfo/routes/getUserInfo.route'
 );
@@ -37,7 +39,7 @@ app.get('/health', (req, res) => {
     port: Number(process.env.PORT || 3002),
   });
 });
-
+app.use('/',VASgetProfile);
 app.use('/', getUserInfoRoutes);
 app.use('/', updateUserInfoRoutes);
 app.use('/', addAccountRequestRoutes);
