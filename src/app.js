@@ -1,8 +1,5 @@
 const express = require('express');
 
-const getUserInfoRoutes = require(
-  './APIs/GetUserInfo/routes/getUserInfo.route'
-);
 
 const updateUserInfoRoutes = require(
   './APIs/UpdateUserInfo/routes/updateUserInfo.route'
@@ -27,6 +24,10 @@ const listExistCustomer = require('./APIs/ListExistCustomer/routes/route')
 const customerValidation = require('./APIs/GETCustomerValidation/routes/route')
 const createIndividualRoutes = require('./APIs/GetUserInfo/routes/getUserInfo.route');// for ctk632
 const VASgetProfile = require('./APIS/VAS_ListProfile/routes/route')
+
+//keep this below other routes please
+const getUserInfoRoutes = require('./APIs/GetUserInfo/routes/getUserInfo.route');
+
 const app = express();
 
 app.use(express.json());
@@ -39,7 +40,6 @@ app.get('/health', (req, res) => {
   });
 });
 
-app.use('/', getUserInfoRoutes);
 app.use('/', updateUserInfoRoutes);
 app.use('/', addAccountRequestRoutes);
 app.use('/', getAccountDetailRequest);
@@ -52,5 +52,8 @@ app.use('/', listExistCustomer);
 app.use('/',customerValidation);
 app.use('/', createIndividualRoutes);//for ctk632
 app.use('/',VASgetProfile);
+
+//please keep this below other routes
+app.use('/', getUserInfoRoutes);
 
 module.exports = app;
