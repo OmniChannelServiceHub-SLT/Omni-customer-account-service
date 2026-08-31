@@ -26,6 +26,7 @@ const updateISPContact = require('./APIs/UpdateISPContact/routes/route')
 const listExistCustomer = require('./APIs/ListExistCustomer/routes/route')
 const customerValidation = require('./APIs/GETCustomerValidation/routes/route')
 const createIndividualRoutes = require('./APIs/GetUserInfo/routes/getUserInfo.route');// for ctk632
+const VASgetProfile = require('./APIS/VAS_ListProfile/routes/route')
 const app = express();
 
 app.use(express.json());
@@ -50,5 +51,6 @@ app.use('/',updateISPContact);
 app.use('/', listExistCustomer);
 app.use('/',customerValidation);
 app.use('/', createIndividualRoutes);//for ctk632
+app.use('/',VASgetProfile);
 
 module.exports = app;
