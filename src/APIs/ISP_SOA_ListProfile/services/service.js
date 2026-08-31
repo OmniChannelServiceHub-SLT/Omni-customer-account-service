@@ -1,6 +1,6 @@
 const Individual = require('../../../models/TMF632_individual');
 
-const Account = require('../../models/TMF666_Account');
+const Account = require('../../../models/TMF666_account');
 
 exports.getIndividualByAccountNo = async (accountNo) => {
   // Find the account by id (accountNo)
