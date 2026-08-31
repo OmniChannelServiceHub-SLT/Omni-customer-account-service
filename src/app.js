@@ -5,6 +5,7 @@ const ISP_DIRECTgetProfile = require('./APIs/ISP_Direct_ListProfile/routes/route
 const ISP_SOAgetProfile = require('./APIs/ISP_SOA_ListProfile/routes/route')
 const ISP_DIRECTpatchContact = require('./APIs/ISP_Direct_PatchContact/routes/route')
 const ISP_SOApatchContact = require('./APIs/ISP_SOA_PatchContact/routes/route')
+const PEO_PEOProfile = require('./APIs/PEO_Get_PEOProfile/routes/route')
 
 const getUserInfoRoutes = require(
   './APIs/GetUserInfo/routes/getUserInfo.route'
@@ -43,6 +44,7 @@ app.get('/health', (req, res) => {
     port: Number(process.env.PORT || 3002),
   });
 });
+app.use('/',PEO_PEOProfile)
 app.use('/',ISP_SOApatchContact);
 app.use('/',ISP_DIRECTpatchContact);
 app.use('/',ISP_SOAgetProfile);
