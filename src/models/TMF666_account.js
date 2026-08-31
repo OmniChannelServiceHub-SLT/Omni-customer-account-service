@@ -33,7 +33,7 @@ const accountSchema = new mongoose.Schema({
     href: String,
     name: String,
     role: String,      // e.g., 'Owner', 'User'
-    '@referredType': { type: String, default: 'Individual' },
+    '@referredType': { type: String, default: 'TMF632_individual' },
   }],
   // Contact information (telephone from legacy)
   contact: [{

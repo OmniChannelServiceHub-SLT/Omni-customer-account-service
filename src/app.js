@@ -1,5 +1,9 @@
 const express = require('express');
 
+const VASgetProfile = require('./APIS/VAS_ListProfile/routes/route')
+const ISP_DIRECTgetProfile = require('./APIs/ISP_Direct_ListProfile/routes/route')
+const ISP_SOAgetProfile = require('./APIs/ISP_SOA_ListProfile/routes/route')
+
 const getUserInfoRoutes = require(
   './APIs/GetUserInfo/routes/getUserInfo.route'
 );
@@ -37,7 +41,9 @@ app.get('/health', (req, res) => {
     port: Number(process.env.PORT || 3002),
   });
 });
-
+app.use('/',ISP_SOAgetProfile);
+app.use('/',ISP_DIRECTgetProfile);
+app.use('/',VASgetProfile);
 app.use('/', getUserInfoRoutes);
 app.use('/', updateUserInfoRoutes);
 app.use('/', addAccountRequestRoutes);
