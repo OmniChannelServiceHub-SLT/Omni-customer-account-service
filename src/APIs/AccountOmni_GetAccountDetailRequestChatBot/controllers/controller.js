@@ -1,9 +1,5 @@
 const service = require('../services/service');
 
-/**
- * TMF666-compliant GET /account/chatbot?accountNo=XXX
- * Returns pure TMF666 Account resource – NO legacy envelope.
- */
 exports.getAccountDetailChatBot = async (req, res) => {
   const { accountNo } = req.query;
 
