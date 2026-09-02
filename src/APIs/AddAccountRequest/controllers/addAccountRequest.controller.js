@@ -1,64 +1,39 @@
 const service = require('../services/addAccountRequest.service');
 
 exports.createAccount = async (req, res) => {
-  const { accountNo, TelephoneNo, nic } = req.query;
+  const accountData = req.body;  // ← Use request body, not query
 
-  // Check if account already exists (duplicate prevention)
-  const existingAccount = await service.findAccountByAccountNo(accountNo);
-  if (existingAccount) {
-    return res.status(409).json({
-      code: 'DUPLICATE_ACCOUNT',
-      message: `Account with id ${accountNo} already exists`,
+  // Check for required fields (TMF standard)
+  if (!accountData.id) {
+    return res.status(400).json({
+      code: 'MISSING_ID',
+      message: 'Account id is required'
     });
   }
 
-  // Build TMF Account resource
-  const accountData = {
-    id: accountNo,
-    name: `Account ${accountNo}`,
-    description: `Account for telephone ${TelephoneNo}`,
-    state: 'active',
-    contact: [
-      {
-        mediumType: 'Phone',
-        characteristic: { phoneNumber: TelephoneNo },
-        preferred: true,
-      },
-    ],
-  };
-
-  // If NIC is provided, link to existing Individual (Party)
-  if (nic) {
-    const individual = await service.findIndividualByNIC(nic);
-    if (individual) {
-      accountData.relatedParty = [
-        {
-          id: individual.id,
-          href: individual.href || `/tmf-api/partyManagement/v4/individual/${individual.id}`,
-          name: individual.name,
-          role: 'Owner',
-          '@referredType': 'Individual',
-        },
-      ];
-    }
-    // If no individual found, we still create the account without relatedParty
-    // (matches legacy behavior - doesn't fail if NIC not found)
+  // Check if account already exists
+  const existingAccount = await service.findAccountByAccountNo(accountData.id);
+  if (existingAccount) {
+    return res.status(409).json({
+      code: 'DUPLICATE_ACCOUNT',
+      message: `Account with id ${accountData.id} already exists`,
+    });
   }
 
-  // Create the account
+  // Create the account (accountData is already TMF-shaped)
   const account = await service.createAccount(accountData);
 
   // Return pure TMF Account resource (no envelope)
   res.status(201).json({
     id: account.id,
-    href: account.href,
-    '@type': account['@type'],
+    href: account.href || `/tmf-api/accountManagement/v4/account/${account.id}`,
+    '@type': account['@type'] || 'Account',
     name: account.name,
     description: account.description,
-    state: account.state,
-    relatedParty: account.relatedParty,
-    contact: account.contact,
-    '@baseType': account['@baseType'],
+    state: account.state || 'active',
+    relatedParty: account.relatedParty || [],
+    contact: account.contact || [],
+    '@baseType': account['@baseType'] || 'Account',
     '@schemaLocation': account['@schemaLocation'],
   });
 };
