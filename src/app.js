@@ -32,13 +32,14 @@ const getAccountDetailRequest = require(
 const removeAccountRequest = require(
   './APIs/RemoveAccountRequest/routes/route'
 );
-const VASAccountRequestRoutes = require('./APIs/VASAccountRequest/routes/route')
-const getProfile = require('./APIs/GetProfile/routes/route')
-const updateContact = require('./APIs/UpdateContact/routes/route')
-const updateISPContact = require('./APIs/UpdateISPContact/routes/route')
-const listExistCustomer = require('./APIs/ListExistCustomer/routes/route')
-const customerValidation = require('./APIs/GETCustomerValidation/routes/route')
+const VASAccountRequestRoutes = require('./APIs/VASAccountRequest/routes/route');
+const getProfile = require('./APIs/GetProfile/routes/route');
+const updateContact = require('./APIs/UpdateContact/routes/route');
+const updateISPContact = require('./APIs/UpdateISPContact/routes/route');
+const listExistCustomer = require('./APIs/ListExistCustomer/routes/route');
+const customerValidation = require('./APIs/GETCustomerValidation/routes/route');
 const createIndividualRoutes = require('./APIs/GetUserInfo/routes/getUserInfo.route');// for ctk632
+const PatchAccountRequest = require('./APIs/PatchAccountRequest/routes/route');// this route not give under the microservice but implemented to be clean
 const app = express();
 
 app.use(express.json());
@@ -74,5 +75,5 @@ app.use('/',updateISPContact);
 app.use('/', listExistCustomer);
 app.use('/',customerValidation);
 app.use('/', createIndividualRoutes);//for ctk632
-
+app.use('/',PatchAccountRequest);
 module.exports = app;
