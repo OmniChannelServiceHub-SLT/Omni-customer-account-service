@@ -4,6 +4,6 @@ const controller = require('../controllers/addAccountRequest.controller');
 const router = express.Router();
 
 // TMF666-compliant account creation
-router.post('/tmf-api/accountManagement/v4/account', controller.createAccount);
+router.post('/tmf-api/accountManagement/v4/billingAccount', controller.createAccount);
 
 module.exports = router;
