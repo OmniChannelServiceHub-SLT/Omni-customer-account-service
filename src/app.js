@@ -11,6 +11,7 @@ const ISP_DIRECTpatchContact = require('./APIs/ISP_Direct_PatchContact/routes/ro
 const ISP_SOApatchContact = require('./APIs/ISP_SOA_PatchContact/routes/route')
 const PEO_PEOProfile = require('./APIs/PEO_Get_PEOProfile/routes/route')
 const Dashboard_listProfileDistributionDashboard = require('./APIs/Dashboard_listProfileDistributionDashboard/routes/route')
+const AccountOmni_GetAccountDetailRequestChatBot = require('./APIs/AccountOmni_GetAccountDetailRequestChatBot/routes/route')
 
 const getUserInfoRoutes = require(
   './APIs/GetUserInfo/routes/getUserInfo.route'
@@ -53,6 +54,7 @@ app.get('/health', (req, res) => {
 //stub for tmf666 unimplemented routes
 app.use('/',stubRoutes);
 
+app.use('/',AccountOmni_GetAccountDetailRequestChatBot)
 app.use('/',Dashboard_listProfileDistributionDashboard);
 app.use('/',PEO_PEOProfile)
 app.use('/',ISP_SOApatchContact);
