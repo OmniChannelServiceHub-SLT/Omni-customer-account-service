@@ -59,11 +59,11 @@ function shapeFullResource(account) {
         id: 'default-format',
         href: 'http://localhost:3002/tmf-api/accountManagement/v4/billFormat/default-format',
       },
-      presentationMedia: {
+      presentationMedia: [{
         '@type': 'BillPresentationMediaRef',
         id: 'default-media',
         href: 'http://localhost:3002/tmf-api/accountManagement/v4/billPresentationMedia/default-media',
-      },
+      }],
     },
     contact: account.contact || [
       {
