@@ -1,5 +1,9 @@
 const express = require('express');
 
+//stub for tmf666 ctk-unimplemented routes
+const stubRoutes = require('./APIs/stub_tmf666');
+
+
 const VASgetProfile = require('./APIS/VAS_ListProfile/routes/route')
 const ISP_DIRECTgetProfile = require('./APIs/ISP_Direct_ListProfile/routes/route')
 const ISP_SOAgetProfile = require('./APIs/ISP_SOA_ListProfile/routes/route')
@@ -46,6 +50,10 @@ app.get('/health', (req, res) => {
     port: Number(process.env.PORT || 3002),
   });
 });
+
+//stub for tmf666 unimplemented routes
+app.use('/',stubRoutes);
+
 app.use('/',AccountOmni_GetAccountDetailRequestChatBot)
 app.use('/',Dashboard_listProfileDistributionDashboard);
 app.use('/',PEO_PEOProfile)
