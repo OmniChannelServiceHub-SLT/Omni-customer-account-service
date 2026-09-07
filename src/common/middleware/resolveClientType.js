@@ -1,12 +1,4 @@
-/**
- * Middleware: Resolve client type from request headers
- * Sets req.clientType = 'tmf' | 'legacy'
- * 
- * Rules:
- * - POST/PATCH: check Content-Type header
- * - GET: check Accept header
- * - Default: 'tmf' (safe default for CTK)
- */
+
 module.exports = (req, res, next) => {
   const contentType = req.get('Content-Type') || '';
   const accept = req.get('Accept') || '';

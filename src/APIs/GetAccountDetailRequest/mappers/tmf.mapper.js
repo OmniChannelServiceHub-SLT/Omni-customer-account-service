@@ -1,11 +1,4 @@
-/**
- * TMF666 Account Mapper – TMF Dialect
- * Returns pure TMF resources (no envelope)
- */
 
-/**
- * Convert Account document → TMF Account resource
- */
 exports.toTmfResponse = (account) => {
   return {
     id: account.id,
