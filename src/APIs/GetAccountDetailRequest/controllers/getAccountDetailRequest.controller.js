@@ -1,5 +1,88 @@
 const service = require('../services/getAccountDetailRequest.service');
+const mappers = require('../mappers');
 
+
+/**
+ * Field selection helper (for TMF)
+ */
+function applyFieldSelection(resource, fieldsParam) {
+  if (!fieldsParam) return resource;
+  const requested = fieldsParam.split(',').map(f => f.trim());
+  const always = ['@type', 'id', 'href'];
+  const keep = new Set([...always, ...requested]);
+  const result = {};
+  for (const key of Object.keys(resource)) {
+    if (keep.has(key)) result[key] = resource[key];
+  }
+  return result;
+}
+
+/**
+ * GET /account/{id}
+ */
+exports.getAccount = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const account = await service.getAccountById(id);
+
+    if (!account) {
+      const err = new Error(`Account with id ${id} not found`);
+      err.statusCode = 404;
+      err.code = 'NOT_FOUND';
+      return next(err);
+    }
+
+    // Pick mapper
+    const mapper = req.clientType === 'tmf' ? mappers.tmf : mappers.legacy;
+    let response = mapper.toTmfResponse(account);
+
+    // Apply field selection only for TMF
+    if (req.clientType === 'tmf' && req.query.fields) {
+      response = applyFieldSelection(response, req.query.fields);
+    }
+
+    res.status(200).json(response);
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * GET /account (collection)
+ */
+exports.listAccounts = async (req, res, next) => {
+  try {
+    const { name, fields } = req.query;
+
+    const filter = {};
+    if (name) filter.name = name;
+
+    const accounts = await service.listAccounts(filter);
+
+    const mapper = req.clientType === 'tmf' ? mappers.tmf : mappers.legacy;
+    let result = accounts.map(account => mapper.toTmfResponse(account));
+
+    // Field selection for TMF
+    if (req.clientType === 'tmf' && fields) {
+      const requested = fields.split(',').map(f => f.trim());
+      const always = ['@type', 'id', 'href'];
+      const keep = new Set([...always, ...requested]);
+      result = result.map(item => {
+        const filtered = {};
+        for (const key of Object.keys(item)) {
+          if (keep.has(key)) filtered[key] = item[key];
+        }
+        return filtered;
+      });
+    }
+
+    res.status(200).json(result);
+  } catch (err) {
+    next(err);
+  }
+};
+
+//******************************************* */
 function applyFieldSelection(resource, fieldsParam) {
   if (!fieldsParam) return resource;
   const requested = fieldsParam.split(',').map((f) => f.trim());
