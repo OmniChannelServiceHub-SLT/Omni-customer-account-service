@@ -11,6 +11,12 @@ module.exports = (req, res, next) => {
   const contentType = req.get('Content-Type') || '';
   const accept = req.get('Accept') || '';
 
+
+
+  console.log('\n🔍 [Middleware] Headers:');
+  console.log('  Content-Type:', contentType);
+  console.log('  Accept:', accept);
+
   // For POST/PATCH: check Content-Type
   if (req.method === 'POST' || req.method === 'PATCH') {
     if (contentType.includes('application/json')) {
