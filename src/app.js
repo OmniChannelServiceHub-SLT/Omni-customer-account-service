@@ -1,5 +1,5 @@
 const express = require('express');
-
+const resolveClientType = require('./common/middleware/resolveClientType');
 //stub for tmf666 ctk-unimplemented routes
 const stubRoutes = require('./APIs/stub_tmf666');
 
@@ -43,6 +43,9 @@ const PatchAccountRequest = require('./APIs/PatchAccountRequest/routes/route');/
 const app = express();
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // Parse form-urlencoded
+//Mount the resolveClientType middleware here
+app.use(resolveClientType);
 
 app.get('/health', (req, res) => {
   res.status(200).json({
