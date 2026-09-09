@@ -9,7 +9,7 @@
  * This can be reused for the dataBundle
  */
 function buildFullResource(account) {
-  const href = account.href || `http://localhost:3002/tmf-api/accountManagement/v4/billingAccount/${account.id}`;
+  const href = account.href || `${process.env.BASE_URL}/tmf-api/accountManagement/v4/billingAccount/${account.id}`;
   return {
     id: account.id,
     href,
