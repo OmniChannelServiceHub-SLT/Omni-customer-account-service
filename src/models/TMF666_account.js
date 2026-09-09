@@ -56,7 +56,7 @@ const accountSchema = new mongoose.Schema({
 accountSchema.pre('save', function () {
   if (!this.href) {
     const resourcePath = this['@type'] === 'BillingAccount' ? 'billingAccount' : 'account';
-    this.href = `http://localhost:3002/tmf-api/accountManagement/v4/${resourcePath}/${this.id}`;
+    this.href = `${process.env.BASE_URL}/tmf-api/accountManagement/v4/${resourcePath}/${this.id}`;
   }
  // next();
 });
