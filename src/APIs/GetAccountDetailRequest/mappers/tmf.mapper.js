@@ -1,6 +1,4 @@
-/**
- * TMF666 Account Mapper – TMF Dialect (pure BillingAccount resource)
- */
+/*
 exports.toTmfResponse = (account) => {
   const href = account.href || `http://localhost:3002/tmf-api/accountManagement/v4/billingAccount/${account.id}`;
 
@@ -102,9 +100,7 @@ exports.toTmfResponse = (account) => {
   };
 };
 
-/**
- * TMF error shape
- */
+
 exports.toTmfError = (err) => {
   return {
     code: err.code || 'INTERNAL_ERROR',
@@ -113,7 +109,10 @@ exports.toTmfError = (err) => {
     status: err.statusCode || 500,
   };
 };
-/*
+
+*/
+
+//-----------------------
 exports.toTmfResponse = (account) => {
   return {
     id: account.id,
@@ -137,4 +136,3 @@ exports.toTmfError = (err) => {
     status: err.statusCode || 500
   };
 };
-*/
