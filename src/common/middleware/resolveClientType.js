@@ -10,7 +10,7 @@ module.exports = (req, res, next) => {
   console.log('  Accept:', accept);
 
   // For POST/PATCH: check Content-Type
-  if (req.method === 'POST' || req.method === 'PATCH') {
+  if (req.method === 'POST' || req.method === 'PATCH'|| req.method === 'DELETE') {
     if (contentType.includes('application/json')) {
       req.clientType = 'tmf';
     } else if (contentType.includes('application/x-www-form-urlencoded')) {
