@@ -1,49 +1,37 @@
 const service = require('../services/service');
 
-exports.deleteAccount = async (req, res) => {
-  const { id } = req.params;
+const mappers = require('../mappers');
 
-  const account = await service.getAccountById(id);
-  if (!account) {
-    return res.status(404).json({
-      code: 'NOT_FOUND',
-      message: `Account with id ${id} not found`,
-    });
+exports.removeAccount = async (req, res, next) => {
+  try {
+    const mapper = req.clientType === 'tmf' ? mappers.tmf : mappers.legacy;
+    const id = req.params.id || req.query.accountNo || req.body?.accountNo;
+
+    if (!id) {
+      const err = new Error('accountNo is required');
+      err.statusCode = 400;
+      err.code = 'MISSING_PARAMETER';
+      return next(err);
+    }
+
+    const account = await service.getAccountById(id);
+    if (!account) {
+      const err = new Error(`Account with id ${id} not found`);
+      err.statusCode = 404;
+      err.code = 'NOT_FOUND';
+      return next(err);
+    }
+
+    await service.removeAccountById(id);
+
+    // TMF666 DELETE → 204 no body
+    if (req.clientType === 'tmf') {
+      return res.status(204).send();
+    }
+
+    // Legacy → 200 with envelope
+    res.status(200).json(mapper.toLegacyResponse(account));
+  } catch (err) {
+    next(err);
   }
-
-  await service.removeAccountById(id);
-
-  // TMF666 DELETE requires 204 with no response body
-  res.status(204).send();
 };
-/*const service = require('../services/service');
-
-exports.deleteAccount = async (req, res) => {
-  const { id } = req.params; // accountNo from URL
-
-  // Check if account exists
-  const account = await service.getAccountById(id);
-  if (!account) {
-    return res.status(404).json({
-      code: 'NOT_FOUND',
-      message: `Account with id ${id} not found`,
-    });
-  }
-
-  // Delete the account
-  await service.removeAccountById(id);
-
-  // Return success with the deleted account resource
-  res.json({
-    id: account.id,
-    href: account.href,
-    '@type': account['@type'],
-    name: account.name,
-    description: account.description,
-    state: 'terminated', // or 'deleted'
-    relatedParty: account.relatedParty,
-    contact: account.contact,
-    '@baseType': account['@baseType'],
-    '@schemaLocation': account['@schemaLocation'],
-  });
-};*/
