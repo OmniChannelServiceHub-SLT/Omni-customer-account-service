@@ -5,5 +5,11 @@ exports.getAccountById = async (id) => {
 };
 
 exports.removeAccountById = async (id) => {
-  return await Account.findOneAndDelete({ id });
+ // return await Account.findOneAndDelete({ id });
+ //eturn await Account.findOneAndDelete({ id, '@type': 'BillingAccount' });
+   return await Account.findOneAndUpdate(
+    { id, '@type': 'BillingAccount' },
+    { $set: { state: 'terminated' } },
+    { new: true }
+  );
 };
