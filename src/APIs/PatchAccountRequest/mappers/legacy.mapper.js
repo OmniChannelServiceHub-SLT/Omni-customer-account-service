@@ -1,10 +1,4 @@
-/**
- * TMF666 BillingAccount Mapper – Legacy Dialect (PATCH)
- * Legacy params may arrive in query OR form-urlencoded body — merge both.
- *
- * ⚠️ No authoritative legacy response sample exists for account-update.
- *    Envelope shape mirrors A12 (AddAccountRequest); dataBundle: null.
- */
+
 
 exports.fromLegacyRequest = (req) => {
   const params = { ...(req.query || {}), ...(req.body || {}) };
