@@ -8,6 +8,6 @@ exports.updateAccount = async (id, patchBody) => {
   return await Account.findOneAndUpdate(
     { id, '@type': 'BillingAccount' },
     { $set: patchBody },
-    { new: true }
+    { new: true, runValidators: true }
   );
 };

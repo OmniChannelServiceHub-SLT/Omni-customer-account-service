@@ -1,4 +1,6 @@
+require('dotenv').config();
 const mongoose = require('mongoose');
+
 
 const contactMediumSchema = new mongoose.Schema({
   mediumType: {
@@ -71,9 +73,9 @@ const individualSchema = new mongoose.Schema({
 );
 
 // Pre-save hook to generate href
-individualSchema.pre('save',async function () {
+individualSchema.pre('save', function () {
   if (!this.href) {
-    this.href = `/tmf-api/partyManagement/v4/individual/${this.id}`;
+    this.href = `${process.env.BASE_URL}/tmf-api/partyManagement/v4/individual/${this.id}`;
   }
 });
 
