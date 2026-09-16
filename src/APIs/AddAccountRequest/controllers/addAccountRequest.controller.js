@@ -1,131 +1,69 @@
 const service = require('../services/addAccountRequest.service');
+const mappers = require('../mappers');
 const crypto = require('crypto');
 
-exports.createAccount = async (req, res) => {
-  const accountData = req.body;
+exports.createAccount = async (req, res, next) => {
+  try {
+    // 1. Pick mapper based on client type
+    const mapper = req.clientType === 'tmf' ? mappers.tmf : mappers.legacy;
 
-  accountData.id = accountData.id || crypto.randomUUID();
+    // 2. Extract request data based on client type
+    let accountData;
+    if (req.clientType === 'tmf') {
+      accountData = mapper.fromTmfRequest(req.body);
 
-  const existingAccount = await service.findAccountByAccountNo(accountData.id);
-  if (existingAccount) {
-    return res.status(409).json({
-      code: 'DUPLICATE_ACCOUNT',
-      message: `Account with id ${accountData.id} already exists`,
-    });
+      if (!accountData.id) {
+        // If no id provided, generate one (matches your original behaviour)
+        accountData.id = crypto.randomUUID();
+      }
+    } else {
+      accountData = mapper.fromLegacyRequest(req.query);
+
+      if (!accountData.id) {
+        const err = new Error('accountNo query parameter is required');
+        err.statusCode = 400;
+        err.code = 'MISSING_ACCOUNTNO';
+        return next(err);
+      }
+    }
+
+    // 3. Duplicate check
+    const existing = await service.findAccountByAccountNo(accountData.id);
+    if (existing) {
+      const err = new Error(`Account with id ${accountData.id} already exists`);
+      err.statusCode = 409;
+      err.code = 'DUPLICATE_ACCOUNT';
+      return next(err);
+    }
+
+    // 4. Legacy NIC linking (only set by legacy mapper)
+    if (accountData._nicForLinking) {
+      const individual = await service.findIndividualByNIC(accountData._nicForLinking);
+      if (individual) {
+        accountData.relatedParty = [
+          {
+            id: individual.id,
+            href: individual.href || `/tmf-api/partyManagement/v4/individual/${individual.id}`,
+            name: individual.name,
+            role: 'Owner',
+            '@referredType': 'Individual'
+          }
+        ];
+      }
+      delete accountData._nicForLinking;
+    }
+
+    // 5. Create account
+    const account = await service.createAccount(accountData);
+
+    // 6. ✅ Branch response by client type
+    if (req.clientType === 'tmf') {
+      res.status(201).json(mapper.toTmfResponse(account));
+    } else {
+      res.status(201).json(mapper.toLegacyResponse(account));
+    }
+
+  } catch (err) {
+    next(err);
   }
-
-  const account = await service.createAccount(accountData);
-
-  const href = account.href || `${process.env.BASE_URL}/tmf-api/accountManagement/v4/billingAccount/${account.id}`;
-
-  res.status(201).json({
-    id: account.id,
-    href,
-    '@type': account['@type'] || 'BillingAccount',
-    '@baseType': account['@baseType'] || 'Account',
-    '@schemaLocation': account['@schemaLocation'],
-    name: account.name,
-    description: account.description,
-
-    accountBalance: account.accountBalance || [
-      {
-        '@type': 'AccountBalance',
-        id: `${account.id}-balance-1`,
-        balanceType: 'current',
-        amount: { unit: 'USD', value: 0 },
-        validFor: { startDateTime: new Date().toISOString() },
-      },
-    ],
-
-    accountRelationship: account.accountRelationship || [
-      {
-        '@type': 'AccountRelationship',
-        id: `${account.id}-rel-1`,
-        href: `${href}/relationship/1`,
-        relationshipType: 'associated',
-        account: {
-          '@type': 'AccountRef',
-          '@referredType': 'BillingAccount',
-          id: account.id,
-          href,
-          name: account.name,
-        },
-      },
-    ],
-
-    billStructure: account.billStructure || {
-      '@type': 'BillStructure',
-      cycleSpecification: {
-        '@type': 'BillingCycleSpecificationRef',
-        id: 'default-cycle',
-        href: 'http://localhost:3002/tmf-api/accountManagement/v4/billingCycleSpecification/default-cycle',
-      },
-      format: {
-        '@type': 'BillFormatRef',
-        id: 'default-format',
-        href: 'http://localhost:3002/tmf-api/accountManagement/v4/billFormat/default-format',
-      },
-      presentationMedia: [{
-        '@type': 'BillPresentationMediaRef',
-        id: 'default-media',
-        href: 'http://localhost:3002/tmf-api/accountManagement/v4/billPresentationMedia/default-media',
-      }],
-    },
-
-    contact: account.contact || [
-      {
-        '@type': 'Contact',
-        id: `${account.id}-contact-1`,
-        contactMedium: [{ '@type': 'ContactMedium', id: `${account.id}-medium-1` }],
-        relatedParty: {
-          '@type': 'RelatedPartyRefOrPartyRoleRef',
-          role: 'contact',
-          partyOrPartyRole: {},
-        },
-      },
-    ],
-
-    creditLimit: account.creditLimit || { unit: 'USD', value: 0 },
-
-    defaultPaymentMethod: account.defaultPaymentMethod || {
-      '@type': 'PaymentMethodRef',
-      '@referredType': 'PaymentMethod',
-      id: `${account.id}-payment-method`,
-      href: `http://localhost:3002/tmf-api/paymentMethodManagement/v4/paymentMethod/${account.id}-payment-method`,
-    },
-
-    financialAccount: account.financialAccount || {
-      '@type': 'FinancialAccountRef',
-      '@referredType': 'FinancialAccount',
-      id: `${account.id}-financial-account`,
-      name: 'Linked Financial Account',
-      href: `http://localhost:3002/tmf-api/accountManagement/v4/financialAccount/${account.id}-financial-account`,
-    },
-
-    paymentPlan: account.paymentPlan || [
-      {
-        '@type': 'PaymentPlan',
-        id: `${account.id}-plan-1`,
-        paymentMethod: {
-          '@type': 'PaymentMethodRef',
-          '@referredType': 'PaymentMethod',
-          id: `${account.id}-plan-payment-method`,
-          href: `http://localhost:3002/tmf-api/paymentMethodManagement/v4/paymentMethod/${account.id}-plan-payment-method`,
-        },
-        totalAmount: { unit: 'USD', value: 0 },
-      },
-    ],
-
-    relatedParty: account.relatedParty || [],
-
-    taxExemption: account.taxExemption || [
-      {
-        '@type': 'TaxExemption',
-        id: `${account.id}-tax-1`,
-        taxDefinition: { '@type': 'TaxDefinitionRef', id: 'default-tax-def' },
-      },
-    ],
-  });
 };
-
-
