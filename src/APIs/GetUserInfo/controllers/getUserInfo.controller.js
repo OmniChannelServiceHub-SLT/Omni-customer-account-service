@@ -9,6 +9,119 @@ const service = require('../services/getUserInfo.service');
  *   - GET /individual?id=xxx (filter by id)
  *   - GET /individual?fields=familyName,givenName (field selection)
  */
+
+const mappers = require('../mappers');
+
+
+exports.getIndividual = async (req, res, next) => {
+  try {
+    // ── Legacy dialect ───────────────────────────────────────────────
+    // Legacy always looks up a single Individual by userName and returns
+    // the flat {name, altrContact} envelope.
+    if (req.clientType === 'legacy') {
+      const userName = req.query.userName || req.params.id;
+
+      if (!userName) {
+        return res.status(400).json({
+          isSuccess: false,
+          errorMessege: 'Missing userName query parameter',
+          exceptionDetail: null,
+          dataBundle: null,
+          errorShow: null,
+          errorCode: 'MISSING_USERNAME'
+        });
+      }
+
+      const individual = await service.getIndividualById(userName);
+      return res.status(200).json(mappers.legacy.toLegacyResponse(individual));
+    }
+
+    // ── TMF dialect ──────────────────────────────────────────────────
+    // ⚠️ CTK-verified paths below — do not reorder branches or alter
+    //    response bodies without re-running CTK.
+
+    // Case 1: GET /individual/:id
+    if (req.params.id) {
+      const { id } = req.params;
+      const individual = await service.getIndividualById(id);
+
+      if (!individual) {
+        return res.status(404).json({
+          code: 'NOT_FOUND',
+          message: `Individual with id ${id} not found`
+        });
+      }
+
+      return res.status(200).json(mappers.tmf.toTmfResponse(individual));
+    }
+
+    // Case 2: GET /individual?filters
+    const { id, familyName, givenName, fields, subscriberID } = req.query;
+
+    const filter = {};
+    if (id) filter.id = id;
+    if (familyName) filter.familyName = familyName;
+    if (givenName) filter.givenName = givenName;
+    if (subscriberID) filter.id = subscriberID;
+
+    if (Object.keys(filter).length === 0) {
+      // ⚠️ PRESERVED AS-IS: returns raw Mongoose docs (leaks _id, __v,
+      //    createdAt, updatedAt). CTK-verified behaviour.
+      const allIndividuals = await service.findIndividuals({});
+      return res.status(200).json(allIndividuals);
+    }
+
+    const individuals = await service.findIndividuals(filter);
+
+    if (!individuals || individuals.length === 0) {
+      return res.status(404).json({
+        code: 'NOT_FOUND',
+        message: 'No Individuals found matching criteria'
+      });
+    }
+
+    return res
+      .status(200)
+      .json(mappers.tmf.toTmfListResponse(individuals, fields));
+  } catch (err) {
+    // Dialect-aware error path
+    if (req.clientType === 'legacy') {
+      return res
+        .status(err.statusCode || 500)
+        .json(mappers.legacy.toLegacyError(err));
+    }
+    next(err);
+  }
+};
+
+exports.createIndividual = async (req, res, next) => {
+  try {
+    const individualData = req.body;
+
+    if (!individualData.id) {
+      return res.status(400).json({
+        code: 'MISSING_ID',
+        message: 'Individual id is required'
+      });
+    }
+
+    const existing = await service.findIndividualById(individualData.id);
+    if (existing) {
+      return res.status(409).json({
+        code: 'DUPLICATE_INDIVIDUAL',
+        message: `Individual with id ${individualData.id} already exists`
+      });
+    }
+
+    const newIndividual = await service.createIndividual(individualData);
+
+    return res.status(201).json(mappers.tmf.toTmfResponse(newIndividual));
+  } catch (err) {
+    next(err);
+  }
+};
+
+/*
 exports.getIndividual = async (req, res, next) => {
   try {
     // Case 1: GET /individual/:id (path param)
@@ -146,10 +259,10 @@ exports.createIndividual = async (req, res) => {
   });
 };
 
-/**
- * Legacy wrapper for mobile client:
+
+//Legacy wrapper for mobile client:
  * GET /api/Account/ViewUserInfo?userName=XXX
- */
+
 exports.getViewUserInfoLegacy = async (req, res, next) => {
   try {
     const { userName } = req.query;
@@ -193,4 +306,4 @@ exports.getViewUserInfoLegacy = async (req, res, next) => {
     }
     next(err);
   }
-};
+};*/
