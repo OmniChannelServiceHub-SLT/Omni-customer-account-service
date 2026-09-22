@@ -1,13 +1,4 @@
-/**
- * GetProfileDistributionDashboard Mapper – TMF Dialect (GET collection)
- *
- * Returns a bare array of TMF632 Individual-shaped resources — TMF list
- * operations do not wrap the array.
- *
- * ⚠️ Same output-shape inconsistency as PEOProfile: this returns
- *    '@type: 'Individual'' while CheckExistCustomer / CustomerValidation
- *    return '@type: 'Customer''. Same storage, two resource types.
- */
+
 
 const mapIndividual = (ind) => ({
   id: ind.id,

@@ -1,7 +1,5 @@
 /**
- * GetProfileDistributionDashboard Mapper – Legacy Dialect (GET collection)
- *
- * ⚠️ No CSV row and no sample response. Envelope per A12 convention;
+ *  No CSV row and no sample response. Envelope per A12 convention;
  *    dataBundle carries an array (first array payload in this service —
  *    shape unverified).
  */
