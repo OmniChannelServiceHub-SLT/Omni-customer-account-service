@@ -1,10 +1,4 @@
-/**
- * GetUserInfo Mapper – TMF Dialect
- *
- * ⚠️ CTK-VERIFIED OUTPUT. Do not change field order, field names, or
- *    defaults without re-running CTK. Single and list shapes differ
- *    deliberately — preserved from the pre-mapper controller.
- */
+
 
 exports.toTmfResponse = (individual) => ({
   id: individual.id,
