@@ -4,6 +4,6 @@ const resolveClientType = require('../../../common/middleware/resolveClientType'
 const router = express.Router();
 
 // TMF666‑style service retrieval under accountManagement
-router.get('/tmf-api/accountManagement/v4/service', resolveClientType, controller.getService);
+router.get('/tmf-api/accountManagement/v4/service', resolveClientType, controller.getServiceDetail);
 
 module.exports = router;
