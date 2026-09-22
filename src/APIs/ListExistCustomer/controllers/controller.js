@@ -1,5 +1,5 @@
-const service = require('./checkExistCustomer.service');
-const mappers = require('./mappers');
+const service = require('../services/service');
+const mappers = require('../mappers');
 
 exports.checkExistCustomer = async (req, res, next) => {
   try {
