@@ -35,6 +35,7 @@ const accountSchema = new mongoose.Schema({
   // vs BillingAccount (@type/contactMedium/relatedParty) shapes both need
   // to pass through untouched depending on which resource created the doc.
   contact: [mongoose.Schema.Types.Mixed],
+  characteristic: [mongoose.Schema.Types.Mixed],
   userKey: String,
   '@baseType': { type: String, default: 'Account' },
   '@schemaLocation': { type: String },
