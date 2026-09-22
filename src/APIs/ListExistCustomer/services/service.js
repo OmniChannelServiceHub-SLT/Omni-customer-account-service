@@ -1,12 +1,14 @@
 const Individual = require('../../../models/TMF632_individual');
 const Account = require('../../../models/TMF666_account');
 
-// NIC is stored in the 'id' field of Individual
-exports.findCustomerByNIC = async (nic) => {
-  return await Individual.findOne({ id: nic });
+// telephoneNo = the Individual's contact phone (contactMedium block)
+exports.findCustomerByTelephone = async (telephoneNo) => {
+  return await Individual.findOne({
+    'contactMedium.characteristic.phoneNumber': telephoneNo
+  });
 };
 
-// Accounts whose relatedParty references this NIC
+// For the TMF Customer projection's account[] — same as CheckExistCustomer
 exports.findAccountsByCustomer = async (nic) => {
   return await Account.find({ 'relatedParty.id': nic });
 };

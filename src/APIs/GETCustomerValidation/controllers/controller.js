@@ -1,45 +1,40 @@
 const service = require('../services/service');
+const mappers = require('../mappers');
 
-exports.validateCustomer = async (req, res) => {
-  const { telephoneNo } = req.query;
+exports.validateCustomer = async (req, res, next) => {
+  try {
+    const mapper = req.clientType === 'tmf' ? mappers.tmf : mappers.legacy;
 
-  if (!telephoneNo) {
-    return res.status(400).json({
-      code: 'MISSING_PARAMETER',
-      message: 'telephoneNo query parameter is required',
-    });
+    // CSV A131 uses telephoneNo; accept case variants.
+    const telephoneNo =
+      req.query.telephoneNo || req.query.telephoneno || req.query.tpNo;
+
+    if (!telephoneNo) {
+      const err = new Error('telephoneNo query parameter is required');
+      err.statusCode = 400;
+      err.code = 'MISSING_PARAMETER';
+      return next(err);
+    }
+
+    const customer = await service.findCustomerByTelephone(telephoneNo);
+
+    if (!customer) {
+      const err = new Error(`Customer with telephone ${telephoneNo} not found`);
+      err.statusCode = 404;
+      err.code = 'NOT_FOUND';
+      return next(err);
+    }
+
+    let payload;
+    if (req.clientType === 'tmf') {
+      const accounts = await service.findAccountsByCustomer(customer.id);
+      payload = mapper.toTmfResponse(customer, accounts);
+    } else {
+      payload = mapper.toLegacyResponse(customer);
+    }
+
+    res.status(200).json(payload);
+  } catch (err) {
+    next(err);
   }
-
-  const customer = await service.findCustomerByTelephone(telephoneNo);
-
-  if (!customer) {
-    return res.status(404).json({
-      code: 'NOT_FOUND',
-      message: `Customer with telephone ${telephoneNo} not found`,
-    });
-  }
-
-  // Return TMF629 Customer resource (using Individual data)
-  res.json({
-    id: customer.id,
-    href: customer.href || `/tmf-api/customerManagement/v4/customer/${customer.id}`,
-    '@type': 'Customer',
-    name: customer.name,
-    givenName: customer.givenName,
-    familyName: customer.familyName,
-    contactMedium: customer.contactMedium || [],
-    status: customer.status || 'active',
-    // Extended legacy fields
-    subscriber_package: customer.subscriber_package,
-    subscriber_package_display: customer.subscriber_package_display,
-    subscriber_package_type: customer.subscriber_package_type,
-    first_bill_date: customer.first_bill_date,
-    billing_date: customer.billing_date,
-    blocked: customer.blocked,
-    registered: customer.registered,
-    privileges: customer.privileges,
-    happy_day: customer.happy_day,
-    '@baseType': 'Customer',
-    '@schemaLocation': customer['@schemaLocation'],
-  });
 };
