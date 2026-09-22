@@ -7,7 +7,7 @@ const router = express.Router();
 router.get('/tmf-api/partyManagement/v4/Individual/:id', controller.getIndividual);
 
 // Legacy Backward Compatibility: Flat Envelope
-router.get('/api/Account/ViewUserInfo', resolveClientType,controller.getViewUserInfoLegacy);
+router.get('/api/Account/ViewUserInfo', resolveClientType,controller.getIndividual);
 
 router.post('/tmf-api/partyManagement/v4/Individual',resolveClientType, controller.createIndividual);
 
