@@ -1,45 +1,40 @@
-const service = require('../services/service');
+const service = require('./checkExistCustomer.service');
+const mappers = require('./mappers');
 
-exports.checkExistCustomer = async (req, res) => {
-  const { nic } = req.query;
+exports.checkExistCustomer = async (req, res, next) => {
+  try {
+    const mapper = req.clientType === 'tmf' ? mappers.tmf : mappers.legacy;
 
-  if (!nic) {
-    return res.status(400).json({
-      code: 'MISSING_PARAMETER',
-      message: 'NIC query parameter is required',
-    });
+    // CSV A113 uses uppercase NIC; accept case variants.
+    const nic = req.query.NIC || req.query.nic || req.query.Nic;
+
+    if (!nic) {
+      const err = new Error('NIC query parameter is required');
+      err.statusCode = 400;
+      err.code = 'MISSING_PARAMETER';
+      return next(err);
+    }
+
+    const customer = await service.findCustomerByNIC(nic);
+
+    if (!customer) {
+      const err = new Error(`Customer with NIC ${nic} not found`);
+      err.statusCode = 404;
+      err.code = 'NOT_FOUND';
+      return next(err);
+    }
+
+    let payload;
+    if (req.clientType === 'tmf') {
+      // Accounts only needed for the TMF projection (account[] refs)
+      const accounts = await service.findAccountsByCustomer(nic);
+      payload = mapper.toTmfResponse(customer, accounts);
+    } else {
+      payload = mapper.toLegacyResponse(customer);
+    }
+
+    res.status(200).json(payload);
+  } catch (err) {
+    next(err);
   }
-
-  const customer = await service.findCustomerByNIC(nic);
-
-  if (!customer) {
-    return res.status(404).json({
-      code: 'NOT_FOUND',
-      message: `Customer with NIC ${nic} not found`,
-    });
-  }
-
-  // Return TMF629 Customer resource (using Individual data)
-  res.json({
-    id: customer.id,
-    href: customer.href || `/tmf-api/customerManagement/v4/customer/${customer.id}`,
-    '@type': 'Customer',  // TMF629 resource type
-    name: customer.name,
-    givenName: customer.givenName,
-    familyName: customer.familyName,
-    contactMedium: customer.contactMedium || [],
-    status: customer.status || 'active',
-    // Extended legacy fields
-    subscriber_package: customer.subscriber_package,
-    subscriber_package_display: customer.subscriber_package_display,
-    subscriber_package_type: customer.subscriber_package_type,
-    first_bill_date: customer.first_bill_date,
-    billing_date: customer.billing_date,
-    blocked: customer.blocked,
-    registered: customer.registered,
-    privileges: customer.privileges,
-    happy_day: customer.happy_day,
-    '@baseType': 'Customer',
-    '@schemaLocation': customer['@schemaLocation'],
-  });
 };
