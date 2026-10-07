@@ -1,4 +1,4 @@
-
+// we do not need this anymore. but did not remove since i do not know how it will end
 module.exports = (req, res, next) => {
   const contentType = req.get('Content-Type') || '';
   const accept = req.get('Accept') || '';
