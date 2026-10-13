@@ -41,6 +41,7 @@ const customerValidation = require('./APIs/GETCustomerValidation/routes/route');
 const createIndividualRoutes = require('./APIs/GetUserInfo/routes/getUserInfo.route');// for ctk632
 const PatchAccountRequest = require('./APIs/PatchAccountRequest/routes/route');// this route not give under the microservice but implemented to be clean
 const listService = require('./APIs/ListService/routes/route');
+const listAccountLink = require('./APIs/ListAccountLink/routes/route');
 const app = express();
 
 app.use(express.json());
@@ -81,4 +82,5 @@ app.use('/',customerValidation);
 app.use('/', createIndividualRoutes);//for ctk632
 app.use('/',PatchAccountRequest);
 app.use('/',listService);
+app.use('/',listAccountLink);
 module.exports = app;
