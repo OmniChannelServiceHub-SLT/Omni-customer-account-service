@@ -43,6 +43,7 @@ const PatchAccountRequest = require('./APIs/PatchAccountRequest/routes/route');/
 const listService = require('./APIs/ListService/routes/route');
 const listAccountLink = require('./APIs/ListAccountLink/routes/route');
 const createAccountLink  = require('./APIs/CreateAccountLink/routes/route');
+const deleteAccountLink = require('./APIs/deleteAccountLink/routes/route');
 const app = express();
 
 app.use(express.json());
@@ -85,4 +86,5 @@ app.use('/',PatchAccountRequest);
 app.use('/',listService);
 app.use('/',listAccountLink);
 app.use('/',createAccountLink );
+app.use('/',deleteAccountLink);
 module.exports = app;
